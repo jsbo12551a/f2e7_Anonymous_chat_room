@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Chatroom</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      var socket = io();
+    </script>
+    <style>
+      html,
+      body {
+          
+        background-color: #0088FF;
+        padding: 0;
+        margin: 0;
+        width: 100%;
+        font-family: '微軟正黑體';
+      }
+      .header{
+          background-color: #fff;
+          padding: 10px;
+      }
+      .header h1{
+          margin: 0;
+          text-align: center;
+          color: #0088FF;
+      }
+
+      #container {
+        top: 50px;
+        width: 80%;
+        margin: 0 auto;
+        display: block;
+        position: relative;
+      }
+
+      #status-box {
+        text-align: right;
+        font-size: 0.6em;
+      }
+
+      #content {
+        width: 100%;
+        height: 400px;
+        background-color: rgb(110, 179, 240);
+        border-radius: 5px;
+        overflow: auto;
+        margin: 20px;
+      }
+
+      #send-box {
+        width: 100%;
+        text-align: center;
+      }
+
+      #send-box input {
+        display: inline-block;
+      }
+
+      input[name='name'] {
+        width: 15%;
+        border: 0;
+        border-radius: 5px;
+        margin: 20px;
+        padding: 10px;
+      }
+
+      input[name='msg'] {
+        width: 60%;
+        border-radius: 5px;
+        padding: 10px;
+        margin: 10px;
+        border: 0;
+      }
+
+      input[type='submit'] {
+        width: 10%;
+        border: 0;
+        padding: 10px;
+        border-radius: 5px;
+        margin: 10px;
+      }
+
+      .msg {
+        width: 73%;
+        display: inline-block;
+        padding: 5px 0 5px 10px;
+      }
+
+      .msg > span {
+        width: 25%;
+        display: inline-block;
+        text-align: center;
+      }
+
+      .msg > span::before {
+        color: darkred;
+        content: '';
+      }
+
+      .msg > span::after {
+        color: darkred;
+        content: ' : ';
+      }
+    </style>
+  </head>
+  <!-- <body>
+    <div>什麼都沒有做，只有連線。</div>
+    <div id="msg"></div>
+    <script>
+      // 當觸發連線建立事件
+      // 發送 greet 事件給伺服器
+    //   socket.on('connect', function() {
+    //     socket.emit('greet');
+    //   });
+
+      // 當收到伺服器回傳到 greet 事件
+      // 將內容轉到 div 中呈現
+    //   socket.on('greet', function(msg) {
+    //     document.getElementById('msg').innerText = msg;
+    //   });
+    // </script> -->
+  </body>
+  <body>
+      <div class="header">
+          <h1>CHAT</h1>
+      </div>
+    <div id="container">
+      <div id="status-box">
+        目前人數: <span id="status">-</span> / <span id="online">0</span> 人
+      </div>
+      <div id="content"></div>
+      <div id="send-box">
+        <form id="send-form">
+          <input type="text" name="name" id="name" placeholder="暱稱" />
+          <input type="text" name="msg" id="msg" placeholder="說點什麼？" />
+          <input type="submit" value="送出" />
+        </form>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        var status = document.getElementById('status');
+        var online = document.getElementById('online');
+        var sendForm = document.getElementById('send-form');
+        var content = document.getElementById('content');
+
+        socket.on('connect', function() {
+          status.innerText = 'Connected.';
+        });
+
+        socket.on('disconnect', function() {
+          status.innerText = 'Disconnected.';
+        });
+
+        socket.on('online', function(amount) {
+          online.innerText = amount;
+        });
+        socket.on('msg', function(d) {
+          var msgBox = document.createElement('div');
+          msgBox.className = 'msg';
+          var nameBox = document.createElement('span');
+          nameBox.className = 'name';
+          var name = document.createTextNode(d.name);
+          var msg = document.createTextNode(d.msg);
+
+          nameBox.appendChild(name);
+          msgBox.appendChild(nameBox);
+          msgBox.appendChild(msg);
+          content.appendChild(msgBox);
+        });
+        sendForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+
+          var formData = {};
+          var formChild = sendForm.children;
+
+          for (var i = 0; i < sendForm.childElementCount; i++) {
+            var child = formChild[i];
+            if (child.name !== '') {
+              formData[child.name] = child.value;
+            }
+          }
+          socket.emit('send', formData);
+        });
+      });
+    </script>
+  </body>
+</html>
